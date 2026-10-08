@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- HERO SECTION -->
+<div class="py-5 my-5 d-flex align-items-center" style="min-height: 50vh;">
+    <div>
+        <p class="fw-bold mb-2 text-muted" style="letter-spacing: 2px; text-transform: uppercase;">HELLO, I'M {{ profile.name }}</p>
+        <h1 class="display-3 fw-bold mb-4" style="line-height: 1.1;">{{ profile.tagline }}</h1>
+        <div class="d-flex gap-3 mt-5">
+            <a href="#work" class="btn btn-custom">View Projects</a>
+            <a href="#contact" class="btn btn-outline-custom">Contact Me</a>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT ME SECTION -->
+<section id="about" class="py-5 mt-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6 mb-5 mb-lg-0">
+            <div class="p-5 card-soft">
+                <h3 class="fw-bold mb-4">About Me</h3>
+                <div class="text-muted" style="line-height: 1.8; white-space: pre-wrap; font-size: 1.05rem;">{{ profile.about }}</div>
+            </div>
+        </div>
+        <div class="col-lg-5 offset-lg-1">
+            <h3 class="fw-bold mb-4">Toolkit & Skills</h3>
+            <div class="d-flex flex-wrap gap-2">
+                {% for skill in skills_list %}
+                    <span class="badge-pastel">{{ skill }}</span>
+                {% else %}
+                    <span class="badge-pastel">Skills not added yet</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WORK/PROJECTS SECTION -->
+<section id="work" class="py-5 mt-5">
+    <h2 class="section-title">Selected Projects</h2>
+    
+    <div class="row g-4 pb-5">
+        {% for project in projects %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-soft card-project" onclick="window.location.href='{{ url_for('project_detail', id=project.id) }}'">
+                <div class="card-img-container" style="height: 240px;">
+                    {% if project.image_file %}
+                        <img src="{{ url_for('serve_file', filename=project.image_file) }}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="{{ project.title }}">
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100 text-muted">No Image</div>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="mb-3">
+                        <span class="text-muted fw-bold small text-uppercase" style="letter-spacing: 1px;">{{ project.skills }}</span>
+                    </div>
+                    <h5 class="fw-bold mb-3">{{ project.title }}</h5>
+                    <p class="text-muted mb-4" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.95rem;">
+                        {{ project.description }}
+                    </p>
+                    
+                    <div class="mt-auto pt-3 border-top">
+                        <span class="fw-bold small d-flex align-items-center gap-2" style="color: #4a6fa5;">
+                            View Details <i class="bi bi-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="p-5 card-soft d-inline-block text-center mx-auto" style="max-width: 500px;">
+                <h4 class="fw-bold">No Projects Yet</h4>
+                <p class="text-muted">Log in to the dashboard to add your first design.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section id="contact" class="py-5 my-5">
+    <div class="card-soft p-5 text-center mx-auto" style="max-width: 800px;">
+        <h2 class="fw-bold mb-4">Let's Connect</h2>
+        <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+            {% if profile.email %}
+                <a href="mailto:{{ profile.email }}" class="btn btn-custom"><i class="bi bi-envelope-fill me-2"></i> Email Me</a>
+            {% endif %}
+            
+            {% if profile.linkedin and profile.linkedin != '#' %}
+                <a href="{{ profile.linkedin }}" target="_blank" class="btn btn-outline-custom"><i class="bi bi-linkedin me-2"></i> LinkedIn</a>
+            {% endif %}
+            
+            {% if profile.resume_file %}
+                <a href="{{ url_for('serve_file', filename=profile.resume_file) }}" target="_blank" class="btn btn-outline-custom"><i class="bi bi-file-earmark-pdf-fill me-2"></i> Resume</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

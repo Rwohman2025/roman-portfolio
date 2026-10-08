@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-4 pt-4">
+    <a href="{{ url_for('index') }}#work" class="text-decoration-none text-muted fw-bold">
+        <i class="bi bi-arrow-left me-2"></i> Back to Work
+    </a>
+</div>
+
+<div class="card-soft p-4 p-md-5 mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6 mb-5 mb-lg-0">
+            <div class="rounded-4 overflow-hidden border" style="border-color: var(--border-color); background: #f8f9fa;">
+                {% if project.image_file %}
+                    <img src="{{ url_for('serve_file', filename=project.image_file) }}" class="img-fluid w-100" alt="{{ project.title }}">
+                {% else %}
+                    <div class="text-center py-5 text-muted">No Image Uploaded</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-5 offset-lg-1">
+            <div class="mb-3 text-uppercase fw-bold small text-muted" style="letter-spacing: 1px;">{{ project.skills }}</div>
+            <h2 class="display-5 fw-bold mb-4">{{ project.title }}</h2>
+            
+            <div class="text-muted mb-5" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">{{ project.description }}</div>
+            
+            {% if project.doc_file %}
+                <div class="p-4 rounded-4" style="background-color: #f8f9fa; border: 1px solid var(--border-color);">
+                    <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-paperclip"></i> Technical Files
+                    </h6>
+                    <a href="{{ url_for('serve_file', filename=project.doc_file) }}" target="_blank" class="btn btn-outline-custom w-100 text-start d-flex justify-content-between align-items-center">
+                        <span>Download Resources</span>
+                        <i class="bi bi-download"></i>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

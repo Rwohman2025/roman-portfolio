@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card-soft p-5 text-center">
+            <h4 class="fw-bold mb-4">Admin Access</h4>
+            <form method="POST">
+                <div class="mb-3 text-start">
+                    <label class="form-label fw-bold small text-muted">Username</label>
+                    <input type="text" name="username" class="form-control" required autofocus>
+                </div>
+                <div class="mb-4 text-start">
+                    <label class="form-label fw-bold small text-muted">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-custom w-100">Sign In</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

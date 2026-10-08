@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="py-4">
+    <h3 class="fw-bold mb-4">Admin Dashboard</h3>
+    
+    <ul class="nav nav-pills mb-4 gap-2" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-custom active border-0" style="background-color: transparent;" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab">Projects</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-custom border-0" style="background-color: transparent;" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">Profile Settings</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        
+        <!-- PROJECTS TAB -->
+        <div class="tab-pane fade show active" id="projects" role="tabpanel">
+            <div class="row pb-5">
+                <div class="col-lg-4 mb-4">
+                    <div class="card-soft p-4 sticky-top" style="top: 100px;">
+                        <h5 class="fw-bold mb-4">Add New Project</h5>
+                        <form method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="action" value="add_project">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Project Title</label>
+                                <input type="text" name="title" class="form-control" required placeholder="e.g. Cycloidal Drive">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Tags / Skills</label>
+                                <input type="text" name="skills" class="form-control" placeholder="e.g. SolidWorks, FEA">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Description</label>
+                                <textarea name="description" class="form-control" rows="5" required placeholder="Write about the project..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Cover Image (.png/.jpg)</label>
+                                <input type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,.gif,.webp">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small">Tech File (.pdf/.step)</label>
+                                <input type="file" name="document" class="form-control" accept=".pdf,.docx,.txt,.step,.stl,.zip">
+                            </div>
+                            <button type="submit" class="btn btn-custom w-100">Upload Project</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="col-lg-8">
+                    <div class="card-soft p-4">
+                        <h5 class="fw-bold mb-4">Manage Projects</h5>
+                        <div class="table-responsive">
+                            <table class="table align-middle border-0 mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-muted fw-normal pb-3">Title</th>
+                                        <th class="text-muted fw-normal pb-3 text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in projects %}
+                                    <tr>
+                                        <td class="py-3 fw-bold">{{ project.title }}</td>
+                                        <td class="py-3 text-end">
+                                            <a href="{{ url_for('project_detail', id=project.id) }}" class="btn btn-sm btn-outline-secondary px-3 me-2 rounded-pill">View</a>
+                                            <a href="{{ url_for('delete_project', id=project.id) }}" class="btn btn-sm btn-danger px-3 rounded-pill" onclick="return confirm('Delete this project?');">Delete</a>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center py-5 text-muted">No projects uploaded yet.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE SETTINGS TAB -->
+        <div class="tab-pane fade" id="profile" role="tabpanel">
+            <div class="card-soft p-5 mx-auto mb-5" style="max-width: 800px;">
+                <h4 class="fw-bold mb-4">Update Portfolio Info</h4>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="update_profile">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small">Your Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ profile.name }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small">Hero Tagline</label>
+                            <input type="text" name="tagline" class="form-control" value="{{ profile.tagline }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">About Me Bio</label>
+                        <textarea name="about" class="form-control" rows="5">{{ profile.about }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small">Skills (Comma Separated)</label>
+                        <input type="text" name="skills" class="form-control" value="{{ profile.skills }}" placeholder="SolidWorks, Python, CAD, Machining">
+                    </div>
+
+                    <h5 class="fw-bold mt-5 mb-3 border-bottom pb-2">Contact & Links</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small">Email Address</label>
+                            <input type="email" name="email" class="form-control" value="{{ profile.email }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small">LinkedIn URL</label>
+                            <input type="text" name="linkedin" class="form-control" value="{{ profile.linkedin }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 p-3 rounded-3" style="background: #f8f9fa; border: 1px dashed #ccc;">
+                        <label class="form-label fw-bold small">Upload Resume (PDF)</label>
+                        {% if profile.resume_file %}
+                            <p class="text-success small mb-2"><i class="bi bi-check-circle"></i> Current resume uploaded.</p>
+                        {% endif %}
+                        <input type="file" name="resume" class="form-control" accept=".pdf">
+                    </div>
+
+                    <button type="submit" class="btn btn-custom w-100 py-3">Save Profile Settings</button>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+    /* Tab pill active state overrides */
+    .nav-pills .nav-link.active, .nav-pills .show>.nav-link, .nav-pills .btn.active {
+        background-color: var(--text-main) !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}

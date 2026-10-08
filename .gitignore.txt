@@ -1,0 +1,12 @@
+# Python environments
+__pycache__/
+venv/
+env/
+.env
+
+# Ignore local database and uploads so they don't overwrite your live Railway site
+data/portfolio.db
+data/uploads/*
+
+# Keep the uploads folder structure intact
+!data/uploads/.gitkeep
