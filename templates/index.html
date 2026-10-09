@@ -2,12 +2,14 @@
 {% block content %}
 <!-- HERO SECTION -->
 <div class="py-5 my-5 d-flex align-items-center" style="min-height: 50vh;">
-    <div>
-        <p class="fw-bold mb-2 text-muted" style="letter-spacing: 2px; text-transform: uppercase;">HELLO, I'M {{ profile.name }}</p>
-        <h1 class="display-3 fw-bold mb-4" style="line-height: 1.1;">{{ profile.tagline }}</h1>
-        <div class="d-flex gap-3 mt-5">
-            <a href="#work" class="btn btn-custom">View Projects</a>
-            <a href="#contact" class="btn btn-outline-custom">Contact Me</a>
+    <div class="row w-100 align-items-center">
+        <div class="col-lg-8">
+            <p class="fw-bold mb-2 text-muted" style="letter-spacing: 2px; text-transform: uppercase;">HELLO, I'M {{ profile.name }}</p>
+            <h1 class="display-3 fw-bold mb-4" style="line-height: 1.1;">{{ profile.tagline }}</h1>
+            <div class="d-flex gap-3 mt-5">
+                <a href="#work" class="btn btn-custom">View Projects</a>
+                <a href="#contact" class="btn btn-outline-custom">Contact Me</a>
+            </div>
         </div>
     </div>
 </div>
@@ -16,9 +18,12 @@
 <section id="about" class="py-5 mt-5">
     <div class="row align-items-center">
         <div class="col-lg-6 mb-5 mb-lg-0">
-            <div class="p-5 card-soft">
+            <div class="p-5 card-soft text-center text-lg-start">
+                {% if profile.profile_pic %}
+                    <img src="{{ url_for('serve_file', filename=profile.profile_pic) }}" class="rounded-circle mb-4 shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #ffffff;">
+                {% endif %}
                 <h3 class="fw-bold mb-4">About Me</h3>
-                <div class="text-muted" style="line-height: 1.8; white-space: pre-wrap; font-size: 1.05rem;">{{ profile.about }}</div>
+                <div class="text-muted text-start" style="line-height: 1.8; white-space: pre-wrap; font-size: 1.05rem;">{{ profile.about }}</div>
             </div>
         </div>
         <div class="col-lg-5 offset-lg-1">
@@ -29,6 +34,28 @@
                 {% else %}
                     <span class="badge-pastel">Skills not added yet</span>
                 {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- EXPERIENCE SECTION -->
+<section id="experience" class="py-5 mt-5">
+    <h2 class="section-title">Experience & Education</h2>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card-soft p-5">
+                <div class="timeline">
+                    {% for exp in experiences %}
+                    <div class="timeline-item">
+                        <h5 class="fw-bold mb-1">{{ exp.role }}</h5>
+                        <p class="text-accent fw-bold small mb-2">{{ exp.company }} &nbsp;|&nbsp; {{ exp.duration }}</p>
+                        <p class="text-muted mb-0" style="white-space: pre-wrap;">{{ exp.description }}</p>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No experience entries uploaded yet.</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

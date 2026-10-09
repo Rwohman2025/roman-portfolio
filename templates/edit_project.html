@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-4 pt-4">
+    <a href="{{ url_for('dashboard') }}" class="text-decoration-none text-muted fw-bold">
+        <i class="bi bi-arrow-left me-2"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="card-soft p-5 mx-auto mb-5" style="max-width: 700px;">
+    <h3 class="fw-bold mb-4">Edit Project</h3>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label fw-bold small">Project Title</label>
+            <input type="text" name="title" class="form-control" value="{{ project.title }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold small">Tags / Skills</label>
+            <input type="text" name="skills" class="form-control" value="{{ project.skills }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold small">Description</label>
+            <textarea name="description" class="form-control" rows="8" required>{{ project.description }}</textarea>
+        </div>
+        
+        <div class="mb-3 p-3 rounded-3" style="background: #f8f9fa; border: 1px dashed #ccc;">
+            <label class="form-label fw-bold small">Update Cover Image</label>
+            {% if project.image_file %}
+                <p class="text-muted small">Current: {{ project.image_file }}</p>
+            {% endif %}
+            <input type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,.gif,.webp">
+        </div>
+        
+        <div class="mb-4 p-3 rounded-3" style="background: #f8f9fa; border: 1px dashed #ccc;">
+            <label class="form-label fw-bold small">Update Technical File</label>
+            {% if project.doc_file %}
+                <p class="text-muted small">Current: {{ project.doc_file }}</p>
+            {% endif %}
+            <input type="file" name="document" class="form-control" accept=".pdf,.docx,.txt,.step,.stl,.zip">
+        </div>
+        
+        <button type="submit" class="btn btn-custom w-100 py-3">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

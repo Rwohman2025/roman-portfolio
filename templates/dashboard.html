@@ -8,6 +8,9 @@
             <button class="btn btn-outline-custom active border-0" style="background-color: transparent;" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab">Projects</button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-custom border-0" style="background-color: transparent;" id="experience-tab" data-bs-toggle="tab" data-bs-target="#experience" type="button" role="tab">Timeline / Experience</button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="btn btn-outline-custom border-0" style="background-color: transparent;" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">Profile Settings</button>
         </li>
     </ul>
@@ -63,6 +66,7 @@
                                     <tr>
                                         <td class="py-3 fw-bold">{{ project.title }}</td>
                                         <td class="py-3 text-end">
+                                            <a href="{{ url_for('edit_project', id=project.id) }}" class="btn btn-sm btn-outline-primary px-3 me-2 rounded-pill">Edit</a>
                                             <a href="{{ url_for('project_detail', id=project.id) }}" class="btn btn-sm btn-outline-secondary px-3 me-2 rounded-pill">View</a>
                                             <a href="{{ url_for('delete_project', id=project.id) }}" class="btn btn-sm btn-danger px-3 rounded-pill" onclick="return confirm('Delete this project?');">Delete</a>
                                         </td>
@@ -70,6 +74,63 @@
                                     {% else %}
                                     <tr>
                                         <td colspan="2" class="text-center py-5 text-muted">No projects uploaded yet.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPERIENCE TAB -->
+        <div class="tab-pane fade" id="experience" role="tabpanel">
+            <div class="row pb-5">
+                <div class="col-lg-4 mb-4">
+                    <div class="card-soft p-4 sticky-top" style="top: 100px;">
+                        <h5 class="fw-bold mb-4">Add Experience/Education</h5>
+                        <form method="POST">
+                            <input type="hidden" name="action" value="add_experience">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Role / Degree</label>
+                                <input type="text" name="role" class="form-control" required placeholder="e.g. Mechanical Intern">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Company / Institution</label>
+                                <input type="text" name="company" class="form-control" required placeholder="e.g. DEKA Research">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Duration</label>
+                                <input type="text" name="duration" class="form-control" required placeholder="e.g. May 2025 - Aug 2025">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small">Description</label>
+                                <textarea name="description" class="form-control" rows="4" placeholder="Brief bullet points..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-custom w-100">Add Entry</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card-soft p-4">
+                        <h5 class="fw-bold mb-4">Timeline Entries</h5>
+                        <div class="table-responsive">
+                            <table class="table align-middle border-0 mb-0">
+                                <tbody>
+                                    {% for exp in experiences %}
+                                    <tr>
+                                        <td class="py-3">
+                                            <div class="fw-bold">{{ exp.role }}</div>
+                                            <div class="text-muted small">{{ exp.company }} ({{ exp.duration }})</div>
+                                        </td>
+                                        <td class="py-3 text-end">
+                                            <a href="{{ url_for('delete_experience', id=exp.id) }}" class="btn btn-sm btn-danger px-3 rounded-pill" onclick="return confirm('Remove this timeline entry?');">Delete</a>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center py-5 text-muted">No timeline entries yet.</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -101,6 +162,14 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold small">About Me Bio</label>
                         <textarea name="about" class="form-control" rows="5">{{ profile.about }}</textarea>
+                    </div>
+
+                    <div class="mb-4 p-3 rounded-3" style="background: #f8f9fa; border: 1px dashed #ccc;">
+                        <label class="form-label fw-bold small">Profile Picture (.jpg/.png)</label>
+                        {% if profile.profile_pic %}
+                            <p class="text-success small mb-2"><i class="bi bi-check-circle"></i> Picture uploaded.</p>
+                        {% endif %}
+                        <input type="file" name="profile_pic" class="form-control" accept="image/*">
                     </div>
 
                     <div class="mb-4">

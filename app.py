@@ -8,8 +8,6 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'pastel-dynamic-key-2026'
 
-# --- PERSISTENT STORAGE SETUP ---
-# By putting both the DB and Uploads in a 'data' folder, you only need to mount ONE volume in Railway to /app/data
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 UPLOAD_DIR = os.path.join(DATA_DIR, 'uploads')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -43,6 +41,7 @@ class Profile(db.Model):
     email = db.Column(db.String(100), default="your.email@example.com")
     linkedin = db.Column(db.String(200), default="#")
     resume_file = db.Column(db.String(200))
+    profile_pic = db.Column(db.String(200)) # NEW: Profile Picture
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,6 +50,13 @@ class Project(db.Model):
     skills = db.Column(db.String(200))
     image_file = db.Column(db.String(200))
     doc_file = db.Column(db.String(200))
+
+class Experience(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(150), nullable=False)
+    company = db.Column(db.String(150), nullable=False)
+    duration = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -61,16 +67,15 @@ def load_user(user_id):
 def index():
     profile = Profile.query.first()
     projects = Project.query.order_by(Project.id.desc()).all()
-    # Safely split skills string for badges
+    experiences = Experience.query.order_by(Experience.id.desc()).all()
     skills_list = [s.strip() for s in profile.skills.split(',')] if profile and profile.skills else []
-    return render_template('index.html', profile=profile, projects=projects, skills_list=skills_list)
+    return render_template('index.html', profile=profile, projects=projects, skills_list=skills_list, experiences=experiences)
 
 @app.route('/project/<int:id>')
 def project_detail(id):
     project = Project.query.get_or_404(id)
     return render_template('project.html', project=project)
 
-# Serve files from the persistent data directory
 @app.route('/files/<filename>')
 def serve_file(filename):
     from flask import send_from_directory
@@ -105,7 +110,7 @@ def dashboard():
     if request.method == 'POST':
         action = request.form.get('action')
         
-        # HANDLE PROFILE UPDATE
+        # 1. HANDLE PROFILE UPDATE
         if action == 'update_profile':
             profile.name = request.form.get('name')
             profile.tagline = request.form.get('tagline')
@@ -114,27 +119,33 @@ def dashboard():
             profile.email = request.form.get('email')
             profile.linkedin = request.form.get('linkedin')
             
+            # Resume Upload
             resume = request.files.get('resume')
             if resume and allowed_file(resume.filename, DOC_EXTENSIONS):
                 resume_filename = secure_filename(resume.filename)
                 resume.save(os.path.join(app.config['UPLOAD_FOLDER'], resume_filename))
                 profile.resume_file = resume_filename
                 
+            # Profile Picture Upload
+            prof_pic = request.files.get('profile_pic')
+            if prof_pic and allowed_file(prof_pic.filename, IMAGE_EXTENSIONS):
+                pic_filename = secure_filename(prof_pic.filename)
+                prof_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_filename))
+                profile.profile_pic = pic_filename
+                
             db.session.commit()
             flash('Profile updated successfully!', 'success')
             return redirect(url_for('dashboard'))
             
-        # HANDLE ADD PROJECT
+        # 2. HANDLE ADD PROJECT
         elif action == 'add_project':
             title = request.form.get('title')
             description = request.form.get('description')
             skills = request.form.get('skills')
-            
             image_file = request.files.get('image')
             doc_file = request.files.get('document')
             
             image_filename = doc_filename = None
-            
             if image_file and allowed_file(image_file.filename, IMAGE_EXTENSIONS):
                 image_filename = secure_filename(image_file.filename)
                 image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
@@ -142,15 +153,56 @@ def dashboard():
                 doc_filename = secure_filename(doc_file.filename)
                 doc_file.save(os.path.join(app.config['UPLOAD_FOLDER'], doc_filename))
                 
-            new_project = Project(title=title, description=description, skills=skills, 
-                                  image_file=image_filename, doc_file=doc_filename)
+            new_project = Project(title=title, description=description, skills=skills, image_file=image_filename, doc_file=doc_filename)
             db.session.add(new_project)
             db.session.commit()
             flash('Project added successfully.', 'success')
             return redirect(url_for('dashboard'))
+
+        # 3. HANDLE ADD EXPERIENCE
+        elif action == 'add_experience':
+            role = request.form.get('role')
+            company = request.form.get('company')
+            duration = request.form.get('duration')
+            description = request.form.get('description')
+            
+            new_exp = Experience(role=role, company=company, duration=duration, description=description)
+            db.session.add(new_exp)
+            db.session.commit()
+            flash('Experience added successfully.', 'success')
+            return redirect(url_for('dashboard'))
             
     projects = Project.query.order_by(Project.id.desc()).all()
-    return render_template('dashboard.html', profile=profile, projects=projects)
+    experiences = Experience.query.order_by(Experience.id.desc()).all()
+    return render_template('dashboard.html', profile=profile, projects=projects, experiences=experiences)
+
+# EDIT PROJECT
+@app.route('/edit_project/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_project(id):
+    project = Project.query.get_or_404(id)
+    if request.method == 'POST':
+        project.title = request.form.get('title')
+        project.skills = request.form.get('skills')
+        project.description = request.form.get('description')
+        
+        image_file = request.files.get('image')
+        if image_file and allowed_file(image_file.filename, IMAGE_EXTENSIONS):
+            image_filename = secure_filename(image_file.filename)
+            image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            project.image_file = image_filename
+            
+        doc_file = request.files.get('document')
+        if doc_file and allowed_file(doc_file.filename, DOC_EXTENSIONS):
+            doc_filename = secure_filename(doc_file.filename)
+            doc_file.save(os.path.join(app.config['UPLOAD_FOLDER'], doc_filename))
+            project.doc_file = doc_filename
+            
+        db.session.commit()
+        flash('Project updated successfully.', 'success')
+        return redirect(url_for('dashboard'))
+        
+    return render_template('edit_project.html', project=project)
 
 @app.route('/delete/<int:id>')
 @login_required
@@ -161,23 +213,29 @@ def delete_project(id):
     flash('Project deleted.', 'info')
     return redirect(url_for('dashboard'))
 
+@app.route('/delete_experience/<int:id>')
+@login_required
+def delete_experience(id):
+    exp = Experience.query.get_or_404(id)
+    db.session.delete(exp)
+    db.session.commit()
+    flash('Experience removed.', 'info')
+    return redirect(url_for('dashboard'))
+
 def setup_database():
     with app.app_context():
         db.create_all()
-        # Create admin
         if not User.query.filter_by(username='admin').first():
             hashed_pw = generate_password_hash('engineering2026', method='pbkdf2:sha256')
             admin = User(username='admin', password=hashed_pw)
             db.session.add(admin)
-        
-        # Create default profile
         if not Profile.query.first():
             default_profile = Profile()
             db.session.add(default_profile)
-            
         db.session.commit()
 
+# Run globally for production
 setup_database()
+
 if __name__ == '__main__':
- 
     app.run(debug=True, port=5000)
